@@ -1,7 +1,7 @@
 # Tested on python 3.6.5
 # GitHub: ReshyResh
 
-import os, binascii, hashlib, base58, ecdsa, urllib.request, json
+import os, binascii, hashlib, base58, ecdsa, urllib.request
 def ripemd160(x):
     d = hashlib.new('ripemd160')
     d.update(x)
@@ -25,7 +25,7 @@ for n in range(100000000000):
     vk = sk.get_verifying_key()
 	
 	
-    publ_key = '04' + binascii.hexlify(vk.to_string()).decode()       ##Get public key , uncompressed address starts with "1"
+    publ_key = '04' + binascii.hexlify(vk.to_string()).decode()       ##Get public key , uncompressed address starts with "D"
     publ_key_comp=binascii.hexlify(vk.to_string()).decode()	          ##Uncomp
     justx=publ_key_comp[:64]
     justy=publ_key_comp[-64:]
@@ -39,8 +39,8 @@ for n in range(100000000000):
 		
     hash160 = ripemd160(hashlib.sha256(binascii.unhexlify(publ_key)).digest()).digest()
     hash160_1 = ripemd160(hashlib.sha256(binascii.unhexlify(key_comp)).digest()).digest()
-    publ_addr_a1 = b"\x00" + hash160_1                                ##First 2 bytes always 
-    publ_addr_a = b"\x00" + hash160
+    publ_addr_a1 = b"\x1e" + hash160_1                                ##Prefix for DigiByte
+    publ_addr_a = b"\x1e" + hash160
     checksum = hashlib.sha256(hashlib.sha256(publ_addr_a).digest()).digest()[:4]
     checksum1 = hashlib.sha256(hashlib.sha256(publ_addr_a1).digest()).digest()[:4]
     publ_addr_b = base58.b58encode(publ_addr_a + checksum)
@@ -50,21 +50,23 @@ for n in range(100000000000):
     i = n + 1
     print("\n-----------------------------------------")
     print("Private Key                   ", str(i) + ": " + WIF.decode())
-    print("Bitcoin Address               ", str(i) + ": " + publ_addr_b.decode())
+    print("DigiByte Address              ", str(i) + ": " + publ_addr_b.decode())
     print("Private Key Compressed        ", str(i) + ": " + WIF2.decode())
-    print("Bitcoin Address Compressed    ", str(i) + ": " + publ_addr_b1.decode())
+    print("DigiByte Address Compressed   ", str(i) + ": " + publ_addr_b1.decode())
     add=publ_addr_b.decode()
     priv=WIF.decode()
     add_comp=publ_addr_b1.decode()
     priv_comp=WIF2.decode()
     if i!= 100000000000:
         try:
-            url=urllib.request.urlopen("https://blockchain.coinmarketcap.com/api/address?address="+str(add)+"&symbol=BTC&start=1&limit=10")
-            url2=urllib.request.urlopen("https://blockchain.coinmarketcap.com/api/address?address="+str(add_comp)+"&symbol=BTC&start=1&limit=10")
-            data = json.loads(url.read().decode())
-            data2 = json.loads(url2.read().decode())
-            trans=(data['transaction_count'])
-            trans2=(data2['transaction_count'])
+            url = urllib.request.urlopen(
+                f"https://explorer.digiassets.net/api/addr/{add}/balance")
+            url2 = urllib.request.urlopen(
+                f"https://explorer.digiassets.net/api/addr/{add_comp}/balance")
+            data = int(url.read().decode())
+            data2 = int(url2.read().decode())
+            trans = data
+            trans2 = data2
             if trans != 0 or trans2 != 0:
                 loot = "Collisione trovata: "+str(add)+"\nPKey:  "+str(priv)+"\n"+"Compressed: "+str(add_comp)+"\nPKey Compressed:"+str(priv_comp)+"\n"
                 print (loot)
