@@ -2,7 +2,7 @@ import asyncio
 import aiohttp  # pip install aiohttp aiodns
 import time
 from bs4 import BeautifulSoup
-import urllib.request,requests,json
+import urllib.request, requests
 from random import randrange
 import time
 i=0
@@ -11,34 +11,29 @@ i=0
 rand=randrange(904625697166532776746648320380374280100293470930272690489102837043110636675)
 async def get(
     session: aiohttp.ClientSession,
-    color: str,
+    address: str,
 
     **kwargs
 ) -> dict:
     global i
-    color = "|".join(color)
-    url = f"https://blockchain.info/balance?active={color}"
+    url = f"https://explorer.digiassets.net/api/addr/{address}/balance"
     try:
         resp = await session.request('GET', url=url, **kwargs)
         data = await resp.json(content_type=None)
-        bal = 0
-        for key in data:
-            if data[key]['n_tx'] > 0:
-                bal += 1
-        i+=1
+        bal = int(data)
+        i += 1
         if bal > 0:
-            loot = "Collision found at address: "+color+"\nPage no. :"+str(rand)+"\n"
+            loot = f"Collision found at address: {address}\nPage no. :{rand}\n"
             print (loot)
             print ("Writing to loot.txt...")
             lootxt = open("loot.txt", 'a')
             lootxt.write(loot)
             lootxt.close()
-            s = "Collision found at address: "+color+"\nPage no. :"+str(rand)+"\n"
-            s.replace(" ", "%20")
-            #Uncomment the below lines to send the loot to your telegram bot
-            #urltg = "https://api.telegram.org/bot"+ api_key + "/sendMessage?chat_id=" + chat_id + "&text="
-            #msg = urltg + s
-            #ret = requests.get(msg)
+            # Uncomment the below lines to send the loot to your telegram bot
+            # s = loot.replace(" ", "%20")
+            # urltg = "https://api.telegram.org/bot"+ api_key + "/sendMessage?chat_id=" + chat_id + "&text="
+            # msg = urltg + s
+            # ret = requests.get(msg)
         time.sleep(5)
         return data
     except asyncio.TimeoutError:
@@ -48,16 +43,16 @@ async def get(
             time.sleep(5)
 
 
-async def main(colors, **kwargs):
+async def main(addresses, **kwargs):
     global i
     async with aiohttp.ClientSession() as session:
-        htmls = await asyncio.gather(*[get(session, colors, **kwargs)])
+        htmls = await asyncio.gather(*[get(session, addr, **kwargs) for addr in addresses])
         return htmls
 
 if __name__ == '__main__':
     n=0
     while True:
-        colors = []
+        addresses = []
         try:          
             URL = 'https://lbc.cryptoguru.org/dio/'+str(rand)
             page = requests.get(URL)
@@ -76,11 +71,11 @@ if __name__ == '__main__':
                     pub2.append(row[3])
                 n+=1
             for item in pub:
-                colors.append(item)
+                addresses.append(item)
             for item in pub2:
-                colors.append(item)
+                addresses.append(item)
             rand+=1
         except Exception as e:
             print("Error: "+repr(e))
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(main(colors))
+        loop.run_until_complete(main(addresses))

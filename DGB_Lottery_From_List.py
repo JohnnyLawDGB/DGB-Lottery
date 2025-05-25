@@ -2,29 +2,37 @@ import asyncio
 import aiohttp  # pip install aiohttp aiodns
 import time
 from bs4 import BeautifulSoup
-import urllib.request,requests,json
+import urllib.request, requests
 from random import randrange
 i=0
+#api_key = "Tg Api Key here"
+#chat_id = "Tg chat id here"
+rand=randrange(904625697166532776746648320380374280100293470930272690489102837043110636675)
 async def get(
     session: aiohttp.ClientSession,
-    addr: str,
+    add: str,
     **kwargs
 ) -> dict:
     global i
-    url = f"https://blockchain.info/address/{addr}?format=json"
+    url = f"https://explorer.digiassets.net/api/addr/{add}/balance"
     try:
         resp = await session.request('GET', url=url, **kwargs)
         data = await resp.json(content_type=None)
-        bal=data['n_tx']
-        print(i,"-   Transactions for " + addr + " : " + str(data['n_tx']))
+        bal = int(data)
+        print(i, "-   Balance for " + add + " : " + str(bal))
         i+=1
         if bal > 0:
-            loot = "Collision found at address: "+addr+"\nPage no. :"+str(rand)+"\n"
+            loot = "Collision found at address: "+add+"\nPage no. :"+str(rand)+"\n"
             print (loot)
             print ("Writing to loot.txt...")
             lootxt = open("loot.txt", 'a')
             lootxt.write(loot)
             lootxt.close()
+            #s = "Collision found at address: "+add+"\nPage no. :"+str(rand)+"\n"
+            #s.replace(" ", "%20")
+            #urltg = "https://api.telegram.org/bot"+ api_key + "/sendMessage?chat_id=" + chat_id + "&text="
+            #msg = urltg + s
+            #ret = requests.get(msg)
         return data
     except asyncio.TimeoutError:
             pass
@@ -37,17 +45,16 @@ async def main(arr, **kwargs):
     async with aiohttp.ClientSession() as session:
         tasks = []
         for a in arr:
-            tasks.append(get(session=session, addr=a, **kwargs))
+            tasks.append(get(session=session, add=a, **kwargs))
         htmls = await asyncio.gather(*tasks, return_exceptions=False)
         return htmls
 
 
 if __name__ == '__main__':
     n=0
-    arr = []
     while True:
-        rand=input("Insert page number: \n")
-        try:
+        arr = []
+        try:          
             URL = 'https://lbc.cryptoguru.org/dio/'+str(rand)
             page = requests.get(URL)
             priv=[]
@@ -68,9 +75,8 @@ if __name__ == '__main__':
                 arr.append(item)
             for item in pub2:
                 arr.append(item)
+            rand+=1
         except Exception as e:
             print("Error: "+repr(e))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(main(arr))
-        arr.clear()
-        i=0
