@@ -19,6 +19,7 @@ There are two main scripts, `DGB_Lottery_Create.py` will generate a random priva
 The second script `DGB_Lottery_From_List.py` will take in a list of dynamically generated private and public keys (In this case [cryptoguru](https://lbc.cryptoguru.org/dio/) and test every single wallet in that page for balance. HTTP requests are asynchronous, so consider adding a timeout to not get flagged as spam by the blockchain API. (Faster script)
 
 The script `DGB_Lottery_Single_Page.py` is just for proof or testing lucky numbers. It works like the second one, but with a page number of your choice. This is useful to check that the script is working as intended, you could for example try page no. `412146261462724578030299224086806743063916127103968361179779786746970751006` and see the script catch a wallet with transactions on it.
+The script `DGB_Lottery_Slot_GUI.py` provides a simple GUI with a slot-machine style animation while new DigiByte addresses are generated.
 
 # First time run
  - Make sure you have Python 3 or higher installed and setup as OS PATH.
@@ -39,3 +40,4 @@ The script `DGB_Lottery_Single_Page.py` is just for proof or testing lucky numbe
 
 # Contribution
 This is just a small project I had in mind so I'm sure it can be improved in many ways, I'm open to any suggestion!
+
