@@ -79,3 +79,4 @@ if __name__ == '__main__':
             print("Error: "+repr(e))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(main(addresses))
+
